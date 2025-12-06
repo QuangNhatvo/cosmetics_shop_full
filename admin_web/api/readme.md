@@ -1,4 +1,4 @@
-# Cấu trúc các api:
+# Cấu trúc API:
 ## user managerment
 ### Method Get
 ```bash
