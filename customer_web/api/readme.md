@@ -31,13 +31,13 @@ curl -X POST http://localhost:8000/customer_web/api/order.php \
      -H "Content-Type: application/json" \
      -d '{
            "action": "checkout",
-           "recipient_name": "Nguyen Van A",
-           "address": "123 Le Loi, Quan 1, TP.HCM",
-           "phone": "0909123456",
-           "payment_method": "cod",
+           "recipient_name": "Quan Tri Vien",
+           "address": "123 Duong ABC, HCM",
+           "phone": "0912345678",
+           "payment_method": "cash",
            "items": [
-               { "product_id": 5, "quantity": 1 },
-               { "product_id": 6, "quantity": 2 }
+               { "product_id": 2, "quantity": 1 },
+               { "product_id": 3, "quantity": 2 }
            ]
          }'
 ```
