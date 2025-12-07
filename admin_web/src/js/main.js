@@ -212,6 +212,10 @@ function renderUsers() {
     pageTitle.textContent = "Quản Lý Người Dùng";
     app.innerHTML = `
         <div class="panel">
+            <div class="panel-header">
+                <h3>Danh sách người dùng</h3>
+                <button class="btn btn-primary" onclick="openUserModal()"><i class="fas fa-plus"></i> Thêm User</button>
+            </div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -219,8 +223,9 @@ function renderUsers() {
                             <th>ID</th>
                             <th>Tên</th>
                             <th>Email</th>
-                            <th>Tên đăng nhập</th>
+                            <th>SĐT</th>
                             <th>Vai trò</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -229,8 +234,12 @@ function renderUsers() {
                                 <td>${u.id}</td>
                                 <td>${u.name}</td>
                                 <td>${u.email}</td>
-                                <td>${u.username}</td>
-                                <td>${u.role}</td>
+                                <td>${u.phone || ''}</td>
+                                <td><span class="status ${u.role === 'admin' ? 'shipping' : 'completed'}">${u.role}</span></td>
+                                <td>
+                                    <button class="btn btn-secondary btn-sm" onclick="openUserModal(${u.id})"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i></button>
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -238,6 +247,132 @@ function renderUsers() {
             </div>
         </div>
     `;    
+}
+
+function openUserModal(userId = null) {
+    const isEdit = userId !== null;
+    let user = {};
+    
+    if (isEdit) {
+        user = mockData.users.find(u => u.id === userId);
+        modalTitle.textContent = "Cập Nhật Người Dùng";
+    } else {
+        modalTitle.textContent = "Thêm Người Dùng Mới";
+    }
+
+    modalBody.innerHTML = `
+        <div class="form-group">
+            <label>Họ tên</label>
+            <input type="text" id="u-name" class="form-control" value="${user.name || ''}">
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="u-email" class="form-control" value="${user.email || ''}" ${isEdit ? 'readonly style="background:#eee"' : ''}>
+        </div>
+        ${!isEdit ? `
+        <div class="form-group">
+            <label>Mật khẩu</label>
+            <input type="password" id="u-pass" class="form-control">
+        </div>` : `
+        <div class="form-group">
+            <label>Mật khẩu mới (Để trống nếu không đổi)</label>
+            <input type="password" id="u-pass" class="form-control" placeholder="******">
+        </div>
+        `}
+        <div class="form-group">
+            <label>Số điện thoại</label>
+            <input type="text" id="u-phone" class="form-control" value="${user.phone || ''}">
+        </div>
+        <div class="form-group">
+            <label>Địa chỉ</label>
+            <input type="text" id="u-address" class="form-control" value="${user.address || ''}">
+        </div>
+        <div class="form-group">
+            <label>Vai trò</label>
+            <select id="u-role" class="form-control">
+                <option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Khách hàng (Customer)</option>
+                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Quản trị (Admin)</option>
+                <option value="staff" ${user.role === 'staff' ? 'selected' : ''}>Nhân viên (Staff)</option>
+            </select>
+        </div>
+    `;
+
+    modalActionBtn.textContent = isEdit ? "Cập nhật" : "Tạo mới";
+    modalActionBtn.onclick = () => saveUser(userId);
+    modalOverlay.classList.add('active');
+}
+
+function saveUser(userId) {
+    const name = document.getElementById('u-name').value;
+    const email = document.getElementById('u-email').value;
+    const pass = document.getElementById('u-pass').value;
+    const phone = document.getElementById('u-phone').value;
+    const addr = document.getElementById('u-address').value;
+    const role = document.getElementById('u-role').value;
+
+    const formData = new FormData();
+    
+    if (userId) {
+        // Mode UPDATE
+        formData.append('action', 'update');
+        formData.append('user_id', userId);
+        formData.append('name', name);
+        formData.append('phone', phone);
+        formData.append('address', addr);
+        formData.append('role', role);
+        if (pass) formData.append('password', pass);
+    } else {
+        // Mode CREATE
+        if(!name || !email || !pass) {
+            alert("Vui lòng nhập tên, email và mật khẩu!");
+            return;
+        }
+        formData.append('action', 'create');
+        formData.append('name', name);
+        formData.append('email', email);
+        formData.append('password', pass);
+        formData.append('phone', phone);
+        formData.append('address', addr);
+        formData.append('role', role);
+    }
+
+    fetch('api/user.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            alert(data.message);
+            closeModal();
+            location.reload(); // Load lại trang để cập nhật danh sách
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function deleteUser(id) {
+    if(confirm('Bạn có chắc muốn xóa người dùng này? Hành động này không thể hoàn tác.')) {
+        const formData = new FormData();
+        formData.append('action', 'delete');
+        formData.append('user_id', id);
+
+        fetch('api/user.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert("Lỗi: " + data.message);
+            }
+        });
+    }
 }
 
 function renderSettings() {
