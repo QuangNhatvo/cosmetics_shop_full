@@ -1,4 +1,6 @@
 let mockData = typeof phpData !== 'undefined' ? phpData : {};
+let currentProducts = []; 
+let categories = [];      
 
 const app = document.getElementById('app');
 const pageTitle = document.getElementById('page-title');
@@ -9,6 +11,23 @@ const modalActionBtn = document.getElementById('modal-action-btn');
 
 function formatCurrency(amount) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+}
+
+// --- HÀM XỬ LÝ ĐƯỜNG DẪN ẢNH (QUAN TRỌNG) ---
+function getImageUrl(url) {
+    if (!url) return 'https://via.placeholder.com/50';
+    
+    // Nếu là link online (http/https) thì giữ nguyên
+    if (url.startsWith('http')) return url;
+
+    // Xử lý đường dẫn tương đối:
+    // Vì file index.php nằm trong admin_web/, còn ảnh nằm trong uploads/ (ngang hàng admin_web)
+    // Nên đường dẫn đúng phải là: ../uploads/ten_anh.jpg
+    
+    // Xóa dấu / hoặc ../ ở đầu nếu người dùng lỡ nhập dư
+    let cleanUrl = url.replace(/^(\.\.\/|\/)+/, '');
+    
+    return '../' + cleanUrl; 
 }
 
 function navigate(page) {
@@ -25,10 +44,15 @@ function navigate(page) {
     }
 }
 
+// --- DASHBOARD ---
 function renderDashboard() {
     pageTitle.textContent = "Tổng Quan";
-    const totalRev = mockData.orders.reduce((sum, order) => sum + (order.status !== 'cancelled' ? order.total : 0), 0);
-    const newOrders = mockData.orders.filter(o => o.status === 'pending').length;
+    const orders = mockData.orders || [];
+    const products = mockData.products || [];
+    const customers = mockData.customers || [];
+
+    const totalRev = orders.reduce((sum, order) => sum + (order.status !== 'cancelled' ? order.total : 0), 0);
+    const newOrders = orders.filter(o => o.status === 'pending').length;
 
     app.innerHTML = `
         <div class="stats-grid">
@@ -48,14 +72,14 @@ function renderDashboard() {
             </div>
             <div class="card">
                 <div class="card-info">
-                    <h3>${mockData.products.length}</h3>
+                    <h3>${products.length}</h3>
                     <p>Sản phẩm</p>
                 </div>
                 <div class="card-icon"><i class="fas fa-box-open"></i></div>
             </div>
             <div class="card">
                 <div class="card-info">
-                    <h3>${mockData.customers.length}</h3>
+                    <h3>${customers.length}</h3>
                     <p>Khách hàng</p>
                 </div>
                 <div class="card-icon"><i class="fas fa-users"></i></div>
@@ -78,7 +102,7 @@ function renderDashboard() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${mockData.orders.slice(0, 5).map(order => `
+                        ${orders.slice(0, 5).map(order => `
                             <tr>
                                 <td>${order.id}</td>
                                 <td>${order.customer}</td>
@@ -94,8 +118,24 @@ function renderDashboard() {
     `;
 }
 
+// --- QUẢN LÝ SẢN PHẨM ---
 function renderProducts() {
     pageTitle.textContent = "Quản Lý Sản Phẩm";
+    
+    fetch('api/product.php')
+        .then(res => res.json())
+        .then(resData => {
+            if(resData.status === 'success') {
+                currentProducts = resData.data; 
+                displayProductTable(currentProducts);
+            } else {
+                alert('Lỗi tải sản phẩm: ' + resData.message);
+            }
+        })
+        .catch(err => console.error(err));
+}
+
+function displayProductTable(products) {
     app.innerHTML = `
         <div class="panel">
             <div class="panel-header">
@@ -107,24 +147,30 @@ function renderProducts() {
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Hình</th>
                             <th>Tên sản phẩm</th>
                             <th>Danh mục</th>
                             <th>Giá</th>
                             <th>Kho</th>
+                            <th>Trạng thái</th>
                             <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${mockData.products.map(p => `
+                        ${products.map(p => `
                             <tr>
-                                <td>${p.id}</td>
+                                <td>${p.product_id}</td>
+                                <td>
+                                    <img src="${getImageUrl(p.image_url)}" width="50" height="50" style="object-fit:cover; border-radius:4px; border: 1px solid #ddd;">
+                                </td>
                                 <td>${p.name}</td>
-                                <td>${p.category}</td>
+                                <td>${p.category_name || '-'}</td>
                                 <td>${formatCurrency(p.price)}</td>
                                 <td>${p.stock}</td>
+                                <td><span class="status ${p.status === 'active' ? 'completed' : 'cancelled'}">${p.status === 'active' ? 'Đang bán' : 'Ngừng bán'}</span></td>
                                 <td>
-                                    <button class="btn btn-secondary btn-sm" onclick="alert('Chức năng sửa ID: ${p.id}')"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-secondary btn-sm" title="Sửa" onclick="editProduct(${p.product_id})"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm" title="Xóa" onclick="deleteProduct(${p.product_id})"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -135,8 +181,158 @@ function renderProducts() {
     `;
 }
 
+function editProduct(id) {
+    const product = currentProducts.find(p => p.product_id == id);
+    if (product) {
+        openProductModal(product); 
+    } else {
+        alert("Không tìm thấy dữ liệu sản phẩm này!");
+    }
+}
+
+function openProductModal(product = null) {
+    const isEdit = product !== null;
+    modalTitle.textContent = isEdit ? "Cập Nhật Sản Phẩm" : "Thêm Sản Phẩm Mới";
+    modalActionBtn.style.display = 'inline-block'; 
+
+    let catOptions = `<option value="">-- Chọn danh mục --</option>`;
+    categories.forEach(c => {
+        const selected = (product && product.category_id == c.category_id) ? 'selected' : '';
+        catOptions += `<option value="${c.category_id}" ${selected}>${c.name}</option>`;
+    });
+
+    modalBody.innerHTML = `
+        <div class="form-group">
+            <label>Tên sản phẩm (*)</label>
+            <input type="text" id="p-name" class="form-control" value="${product ? product.name : ''}">
+        </div>
+        
+        <div class="form-group">
+            <label>Danh mục (*)</label>
+            <select id="p-cat" class="form-control">
+                ${catOptions}
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+                <label>Giá bán (*)</label>
+                <input type="number" id="p-price" class="form-control" value="${product ? product.price : ''}">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Giảm giá (Số tiền)</label>
+                <input type="number" id="p-discount" class="form-control" value="${product ? product.discount : '0'}">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+             <div class="form-group" style="flex: 1;">
+                <label>Tồn kho</label>
+                <input type="number" id="p-stock" class="form-control" value="${product ? product.stock : '0'}">
+            </div>
+             <div class="form-group" style="flex: 1;">
+                <label>Trạng thái</label>
+                <select id="p-status" class="form-control">
+                    <option value="active" ${product && product.status === 'active' ? 'selected' : ''}>Đang bán (Active)</option>
+                    <option value="inactive" ${product && product.status === 'inactive' ? 'selected' : ''}>Ngừng kinh doanh (Inactive)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Mô tả chi tiết</label>
+            <textarea id="p-desc" class="form-control" rows="3">${product ? product.description : ''}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Link Hình ảnh (Nhập: uploads/ten_anh.jpg)</label>
+            <input type="text" id="p-img" class="form-control" value="${product ? product.image_url : ''}" placeholder="uploads/...">
+            ${product && product.image_url ? 
+                `<br><img src="${getImageUrl(product.image_url)}" height="60" style="border:1px solid #ccc"> <small>Ảnh hiện tại</small>` 
+                : ''}
+        </div>
+    `;
+
+    modalActionBtn.textContent = isEdit ? "Cập nhật" : "Tạo mới";
+    modalActionBtn.onclick = () => saveProduct(isEdit ? product.product_id : null);
+    
+    modalOverlay.classList.add('active');
+}
+
+function saveProduct(id) {
+    const name = document.getElementById('p-name').value;
+    const catId = document.getElementById('p-cat').value;
+    const price = document.getElementById('p-price').value;
+    const discount = document.getElementById('p-discount').value;
+    const stock = document.getElementById('p-stock').value;
+    const desc = document.getElementById('p-desc').value;
+    const img = document.getElementById('p-img').value;
+    const status = document.getElementById('p-status').value;
+
+    if (!name || !price || !catId) {
+        alert("Vui lòng nhập tên, giá và chọn danh mục!");
+        return;
+    }
+
+    const formData = new FormData();
+    if (id) {
+        formData.append('action', 'update');
+        formData.append('product_id', id);
+    } else {
+        formData.append('action', 'create');
+    }
+
+    formData.append('name', name);
+    formData.append('category_id', catId);
+    formData.append('price', price);
+    formData.append('discount', discount);
+    formData.append('stock', stock);
+    formData.append('description', desc);
+    formData.append('image_url', img);
+    formData.append('status', status);
+
+    fetch('api/product.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            alert(data.message);
+            closeModal();
+            renderProducts(); 
+        } else {
+            alert("Lỗi: " + data.message);
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function deleteProduct(id) {
+    if(confirm('Bạn có chắc muốn xóa? Nếu sản phẩm đã bán, bạn sẽ không thể xóa.')) {
+        const formData = new FormData();
+        formData.append('action', 'delete');
+        formData.append('product_id', id);
+
+        fetch('api/product.php', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                alert(data.message);
+                renderProducts();
+            } else {
+                // Hiển thị thông báo lỗi chi tiết (ví dụ: yêu cầu chuyển trạng thái)
+                alert("KHÔNG THỂ XÓA: " + data.message);
+            }
+        });
+    }
+}
+
+// --- CÁC PHẦN KHÁC (ORDERS, CUSTOMERS...) ---
+
 function renderOrders() {
     pageTitle.textContent = "Quản Lý Đơn Hàng";
+    const orders = mockData.orders || [];
     app.innerHTML = `
         <div class="panel">
             <div class="panel-header">
@@ -155,7 +351,7 @@ function renderOrders() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${mockData.orders.map(o => `
+                        ${orders.map(o => `
                             <tr>
                                 <td>${o.id}</td>
                                 <td>${o.customer}</td>
@@ -174,8 +370,31 @@ function renderOrders() {
     `;
 }
 
+function viewOrder(id) {
+    const order = mockData.orders.find(o => o.id == id);
+    if (!order) return;
+
+    modalTitle.textContent = `Chi tiết đơn hàng ${id}`;
+    modalBody.innerHTML = `
+        <p><strong>Khách hàng:</strong> ${order.customer}</p>
+        <p><strong>Ngày đặt:</strong> ${order.date}</p>
+        <p><strong>Trạng thái:</strong> <span class="status ${order.status}">${getStatusText(order.status)}</span></p>
+        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+        <h4>Sản phẩm:</h4>
+        <ul style="list-style: none; margin-top: 10px;">
+            ${order.items.map(i => `<li style="display:flex; justify-content:space-between; padding: 5px 0"><span>${i.name} x${i.qty}</span></li>`).join('')}
+        </ul>
+        <div style="margin-top: 15px; text-align: right; font-weight: bold; font-size: 18px;">
+            Tổng tiền: ${formatCurrency(order.total)}
+        </div>
+    `;
+    modalActionBtn.style.display = 'none'; 
+    modalOverlay.classList.add('active');
+}
+
 function renderCustomers() {
     pageTitle.textContent = "Danh Sách Khách Hàng";
+    const customers = mockData.customers || [];
     app.innerHTML = `
         <div class="panel">
             <div class="table-responsive">
@@ -191,12 +410,12 @@ function renderCustomers() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${mockData.customers.map(c => `
+                        ${customers.map(c => `
                             <tr>
                                 <td>${c.id}</td>
                                 <td>${c.name}</td>
                                 <td>${c.email}</td>
-                                <td>${c.phone}</td>
+                                <td>${c.phone || ''}</td>
                                 <td>${c.orders}</td>
                                 <td>${formatCurrency(c.spent)}</td>
                             </tr>
@@ -210,6 +429,7 @@ function renderCustomers() {
 
 function renderUsers() {
     pageTitle.textContent = "Quản Lý Người Dùng";
+    const users = mockData.users || [];
     app.innerHTML = `
         <div class="panel">
             <div class="panel-header">
@@ -229,7 +449,7 @@ function renderUsers() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${mockData.users.map(u => `
+                        ${users.map(u => `
                             <tr>
                                 <td>${u.id}</td>
                                 <td>${u.name}</td>
@@ -252,14 +472,15 @@ function renderUsers() {
 function openUserModal(userId = null) {
     const isEdit = userId !== null;
     let user = {};
-    
     if (isEdit) {
-        user = mockData.users.find(u => u.id === userId);
+        user = mockData.users.find(u => u.id == userId) || {};
         modalTitle.textContent = "Cập Nhật Người Dùng";
     } else {
         modalTitle.textContent = "Thêm Người Dùng Mới";
     }
 
+    modalActionBtn.style.display = 'inline-block';
+    
     modalBody.innerHTML = `
         <div class="form-group">
             <label>Họ tên</label>
@@ -269,16 +490,10 @@ function openUserModal(userId = null) {
             <label>Email</label>
             <input type="email" id="u-email" class="form-control" value="${user.email || ''}" ${isEdit ? 'readonly style="background:#eee"' : ''}>
         </div>
-        ${!isEdit ? `
         <div class="form-group">
-            <label>Mật khẩu</label>
+            <label>Mật khẩu ${isEdit ? '(Để trống nếu không đổi)' : ''}</label>
             <input type="password" id="u-pass" class="form-control">
-        </div>` : `
-        <div class="form-group">
-            <label>Mật khẩu mới (Để trống nếu không đổi)</label>
-            <input type="password" id="u-pass" class="form-control" placeholder="******">
         </div>
-        `}
         <div class="form-group">
             <label>Số điện thoại</label>
             <input type="text" id="u-phone" class="form-control" value="${user.phone || ''}">
@@ -311,92 +526,41 @@ function saveUser(userId) {
     const role = document.getElementById('u-role').value;
 
     const formData = new FormData();
-    
     if (userId) {
-        // Mode UPDATE
         formData.append('action', 'update');
         formData.append('user_id', userId);
-        formData.append('name', name);
-        formData.append('phone', phone);
-        formData.append('address', addr);
-        formData.append('role', role);
-        if (pass) formData.append('password', pass);
     } else {
-        // Mode CREATE
-        if(!name || !email || !pass) {
-            alert("Vui lòng nhập tên, email và mật khẩu!");
-            return;
-        }
         formData.append('action', 'create');
-        formData.append('name', name);
         formData.append('email', email);
-        formData.append('password', pass);
-        formData.append('phone', phone);
-        formData.append('address', addr);
-        formData.append('role', role);
     }
+    formData.append('name', name);
+    formData.append('password', pass);
+    formData.append('phone', phone);
+    formData.append('address', addr);
+    formData.append('role', role);
 
-    fetch('api/user.php', {
-        method: 'POST',
-        body: formData
-    })
+    fetch('api/user.php', { method: 'POST', body: formData })
     .then(res => res.json())
     .then(data => {
         if(data.status === 'success') {
             alert(data.message);
             closeModal();
-            location.reload(); // Load lại trang để cập nhật danh sách
+            location.reload(); 
         } else {
             alert(data.message);
         }
-    })
-    .catch(err => console.error(err));
+    });
 }
 
 function deleteUser(id) {
-    if(confirm('Bạn có chắc muốn xóa người dùng này? Hành động này không thể hoàn tác.')) {
-        const formData = new FormData();
-        formData.append('action', 'delete');
-        formData.append('user_id', id);
-
-        fetch('api/user.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === 'success') {
-                alert(data.message);
-                location.reload();
-            } else {
-                alert("Lỗi: " + data.message);
-            }
-        });
+    if(confirm('Bạn có chắc muốn xóa?')) {
+        const fd = new FormData();
+        fd.append('action', 'delete');
+        fd.append('user_id', id);
+        fetch('api/user.php', { method: 'POST', body: fd })
+        .then(res=>res.json())
+        .then(d => { alert(d.message); location.reload(); });
     }
-}
-
-function renderSettings() {
-    pageTitle.textContent = "Cài Đặt Hệ Thống";
-    app.innerHTML = `
-        <div class="panel" style="max-width: 600px">
-            <div class="form-group">
-                <label>Tên cửa hàng</label>
-                <input type="text" class="form-control" value="My Tech Shop">
-            </div>
-            <div class="form-group">
-                <label>Email liên hệ</label>
-                <input type="email" class="form-control" value="admin@techshop.com">
-            </div>
-            <div class="form-group">
-                <label>Tiền tệ mặc định</label>
-                <select class="form-control">
-                    <option value="VND">VND (đ)</option>
-                    <option value="USD">USD ($)</option>
-                </select>
-            </div>
-            <button class="btn btn-primary" onclick="alert('Đã lưu cài đặt')">Lưu Thay Đổi</button>
-        </div>
-    `;
 }
 
 function getStatusText(status) {
@@ -409,75 +573,27 @@ function getStatusText(status) {
     return map[status] || status;
 }
 
-function deleteProduct(id) {
-    if(confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
-        mockData.products = mockData.products.filter(p => p.id !== id);
-        renderProducts();
-    }
-}
-
-function openProductModal() {
-    modalTitle.textContent = "Thêm Sản Phẩm Mới";
-    modalBody.innerHTML = `
-        <div class="form-group">
-            <label>Tên sản phẩm</label>
-            <input type="text" id="p-name" class="form-control">
-        </div>
-        <div class="form-group">
-            <label>Giá bán</label>
-            <input type="number" id="p-price" class="form-control">
-        </div>
-        <div class="form-group">
-            <label>Danh mục</label>
-            <select id="p-cat" class="form-control">
-                <option>Laptop</option>
-                <option>Điện thoại</option>
-                <option>Phụ kiện</option>
-            </select>
-        </div>
-    `;
-    modalActionBtn.onclick = () => {
-        const name = document.getElementById('p-name').value;
-        const price = document.getElementById('p-price').value;
-        const cat = document.getElementById('p-cat').value;
-        if(name && price) {
-            mockData.products.push({
-                id: mockData.products.length + 1,
-                name: name,
-                category: cat,
-                price: parseInt(price),
-                stock: 0
-            });
-            closeModal();
-            renderProducts();
-        }
-    };
-    modalOverlay.classList.add('active');
-}
-
-function viewOrder(id) {
-    const order = mockData.orders.find(o => o.id === id);
-    modalTitle.textContent = `Chi tiết đơn hàng ${id}`;
-    modalBody.innerHTML = `
-        <p><strong>Khách hàng:</strong> ${order.customer}</p>
-        <p><strong>Ngày đặt:</strong> ${order.date}</p>
-        <p><strong>Trạng thái:</strong> <span class="status ${order.status}">${getStatusText(order.status)}</span></p>
-        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
-        <h4>Sản phẩm:</h4>
-        <ul style="list-style: none; margin-top: 10px;">
-            ${order.items.map(i => `<li style="display:flex; justify-content:space-between; padding: 5px 0"><span>${i.name} x${i.qty}</span></li>`).join('')}
-        </ul>
-        <div style="margin-top: 15px; text-align: right; font-weight: bold; font-size: 18px;">
-            Tổng tiền: ${formatCurrency(order.total)}
-        </div>
-    `;
-    modalActionBtn.textContent = "Đóng";
-    modalActionBtn.onclick = closeModal;
-    modalOverlay.classList.add('active');
-}
-
 function closeModal() {
     modalOverlay.classList.remove('active');
 }
 
-window.onload = () => renderDashboard();
+function renderSettings() {
+    pageTitle.textContent = "Cài Đặt Hệ Thống";
+    app.innerHTML = `<div class="panel"><p>Chức năng đang phát triển...</p></div>`;
+}
+
+function fetchCategories() {
+    fetch('api/category.php')
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                categories = data.data;
+            }
+        })
+        .catch(err => console.error("Lỗi lấy danh mục:", err));
+}
+
+window.onload = () => {
+    fetchCategories(); 
+    renderDashboard();
+};
