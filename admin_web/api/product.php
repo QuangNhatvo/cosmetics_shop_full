@@ -122,8 +122,16 @@ elseif ($method === 'POST') {
 
             if (isset($_POST['stock'])) {
                 $stock = intval($_POST['stock']);
-                $sql_inv = "INSERT INTO inventory (product_id, quantity) VALUES ($pid, $stock) 
-                            ON DUPLICATE KEY UPDATE quantity=$stock";
+                
+                // Kiem tra ton tai trong inventory chua
+                $check_inv = $conn->query("SELECT inventory_id FROM inventory WHERE product_id=$pid");
+                
+                if ($check_inv && $check_inv->num_rows > 0) {
+                    $sql_inv = "UPDATE inventory SET quantity=$stock WHERE product_id=$pid";
+                } else {
+                    $sql_inv = "INSERT INTO inventory (product_id, quantity) VALUES ($pid, $stock)";
+                }
+
                 if (!$conn->query($sql_inv)) {
                     throw new Exception("Inventory Update Failed: " . $conn->error);
                 }
