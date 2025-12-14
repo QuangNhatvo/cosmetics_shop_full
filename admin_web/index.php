@@ -1,12 +1,7 @@
 <?php 
 require_once '../includes/db.php'; 
 
-
-$sql_products = "SELECT p.product_id as id, p.name, c.name as category, p.price, IFNULL(i.quantity, 0) as stock 
-                 FROM products p 
-                 LEFT JOIN categories c ON p.category_id = c.category_id 
-                 LEFT JOIN inventory i ON p.product_id = i.product_id 
-                 ORDER BY p.product_id DESC";
+$sql_products = "SELECT p.product_id as id, p.name, c.name as category, p.price, IFNULL(i.quantity, 0) as stock FROM products p LEFT JOIN categories c ON p.category_id = c.category_id LEFT JOIN inventory i ON p.product_id = i.product_id ORDER BY p.product_id DESC";
 $res_products = $conn->query($sql_products);
 $products = [];
 if ($res_products) {
@@ -18,11 +13,7 @@ if ($res_products) {
     }
 }
 
-
-$sql_orders = "SELECT o.order_id as id, u.name as customer, o.order_date as date, o.total_amount as total, o.status 
-               FROM orders o 
-               LEFT JOIN users u ON o.user_id = u.user_id 
-               ORDER BY o.order_date DESC";
+$sql_orders = "SELECT o.order_id as id, u.name as customer, o.order_date as date, o.total_amount as total, o.status FROM orders o LEFT JOIN users u ON o.user_id = u.user_id ORDER BY o.order_date DESC";
 $res_orders = $conn->query($sql_orders);
 $orders_map = []; 
 if ($res_orders) {
@@ -35,10 +26,7 @@ if ($res_orders) {
 
 if (!empty($orders_map)) {
     $order_ids = implode(',', array_keys($orders_map));
-    $sql_items = "SELECT oi.order_id, p.name, oi.quantity as qty 
-                  FROM order_items oi 
-                  JOIN products p ON oi.product_id = p.product_id 
-                  WHERE oi.order_id IN ($order_ids)";
+    $sql_items = "SELECT oi.order_id, p.name, oi.quantity as qty FROM order_items oi JOIN products p ON oi.product_id = p.product_id WHERE oi.order_id IN ($order_ids)";
     $res_items = $conn->query($sql_items);
     if ($res_items) {
         while($row = $res_items->fetch_assoc()) {
@@ -54,13 +42,7 @@ if (!empty($orders_map)) {
 }
 $orders = array_values($orders_map); 
 
-$sql_customers = "SELECT u.user_id as id, u.name, u.email, u.phone, 
-                  COUNT(o.order_id) as orders, 
-                  IFNULL(SUM(o.total_amount), 0) as spent 
-                  FROM users u 
-                  LEFT JOIN orders o ON u.user_id = o.user_id 
-                  WHERE u.role = 'customer' 
-                  GROUP BY u.user_id";
+$sql_customers = "SELECT u.user_id as id, u.name, u.email, u.phone, COUNT(o.order_id) as orders, IFNULL(SUM(o.total_amount), 0) as spent FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE u.role = 'customer' GROUP BY u.user_id";
 $res_customers = $conn->query($sql_customers);
 $customers = [];
 if ($res_customers) {
@@ -90,7 +72,6 @@ $mockData = [
 ];
 ?>
 
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -106,6 +87,7 @@ $mockData = [
         <ul class="menu">
             <li><a href="#" onclick="navigate('dashboard')" id="nav-dashboard" class="active"><i class="fas fa-home"></i> Tổng Quan</a></li>
             <li><a href="#" onclick="navigate('products')" id="nav-products"><i class="fas fa-box"></i> Sản Phẩm</a></li>
+            <li><a href="#" onclick="navigate('inventory')" id="nav-inventory"><i class="fas fa-warehouse"></i> Quản Lý Kho</a></li>
             <li><a href="#" onclick="navigate('orders')" id="nav-orders"><i class="fas fa-shopping-cart"></i> Đơn Hàng</a></li>
             <li><a href="#" onclick="navigate('customers')" id="nav-customers"><i class="fas fa-users"></i> Khách Hàng</a></li>
             <li><a href="#" onclick="navigate('users')" id="nav-users"><i class="fas fa-user-shield"></i> Người Dùng</a></li>

@@ -2,26 +2,10 @@
 include '../../includes/db.php';
 header('Content-Type: application/json');
 
-// if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { http_response_code(403); exit; }
-
 $method = $_SERVER['REQUEST_METHOD'];
+
 if ($method === 'GET') {
-    $sql = "SELECT 
-                p.product_id, 
-                p.name, 
-                p.description, 
-                p.price, 
-                p.discount, 
-                p.image_url, 
-                p.status, 
-                c.name as category_name, 
-                c.category_id,
-                IFNULL(i.quantity, 0) as stock 
-            FROM products p 
-            LEFT JOIN categories c ON p.category_id = c.category_id 
-            LEFT JOIN inventory i ON p.product_id = i.product_id 
-            ORDER BY p.product_id DESC";
-            
+    $sql = "SELECT p.product_id, p.name, p.description, p.price, p.discount, p.image_url, p.status, c.name as category_name, c.category_id, IFNULL(i.quantity, 0) as stock FROM products p LEFT JOIN categories c ON p.category_id = c.category_id LEFT JOIN inventory i ON p.product_id = i.product_id ORDER BY p.product_id DESC";
     $result = $conn->query($sql);
 
     $data = [];
@@ -67,8 +51,7 @@ elseif ($method === 'POST') {
         $conn->begin_transaction();
 
         try {
-            $sql_prod = "INSERT INTO products (name, description, price, discount, category_id, image_url, status) 
-                         VALUES ('$name', '$desc', $price, $disc, $cat_id, '$img', '$status')";
+            $sql_prod = "INSERT INTO products (name, description, price, discount, category_id, image_url, status) VALUES ('$name', '$desc', $price, $disc, $cat_id, '$img', '$status')";
             
             if (!$conn->query($sql_prod)) {
                 throw new Exception("Product Insert Failed: " . $conn->error);
@@ -123,7 +106,6 @@ elseif ($method === 'POST') {
             if (isset($_POST['stock'])) {
                 $stock = intval($_POST['stock']);
                 
-                // Kiem tra ton tai trong inventory chua
                 $check_inv = $conn->query("SELECT inventory_id FROM inventory WHERE product_id=$pid");
                 
                 if ($check_inv && $check_inv->num_rows > 0) {
@@ -156,20 +138,30 @@ elseif ($method === 'POST') {
 
         $pid = intval($_POST['product_id']);
 
+        $check_sql = "SELECT order_item_id FROM order_items WHERE product_id = $pid LIMIT 1";
+        $check_result = $conn->query($check_sql);
+
+        if ($check_result && $check_result->num_rows > 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Không thể xóa vì sản phẩm này đã có đơn hàng liên quan!']);
+            exit;
+        }
+
         $conn->begin_transaction();
         try {
             $conn->query("DELETE FROM inventory WHERE product_id=$pid");
+            $conn->query("DELETE FROM product_images WHERE product_id=$pid");
+            $conn->query("DELETE FROM reviews WHERE product_id=$pid");
             
             $sql = "DELETE FROM products WHERE product_id=$pid";
             if (!$conn->query($sql)) {
-                throw new Exception("Delete Failed: " . $conn->error);
+                throw new Exception("Delete Failed");
             }
 
             $conn->commit();
-            echo json_encode(['status' => 'success', 'message' => 'Product deleted']);
+            echo json_encode(['status' => 'success', 'message' => 'Product deleted successfully']);
         } catch (Exception $e) {
             $conn->rollback();
-            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => 'Đã xảy ra lỗi hệ thống khi xóa sản phẩm']);
         }
         exit;
     }

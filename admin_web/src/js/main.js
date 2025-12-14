@@ -13,26 +13,17 @@ function formatCurrency(amount) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 }
 
-// --- HÀM XỬ LÝ ĐƯỜNG DẪN ẢNH (QUAN TRỌNG) ---
 function getImageUrl(url) {
     if (!url) return 'https://via.placeholder.com/50';
-    
-    // Nếu là link online (http/https) thì giữ nguyên
     if (url.startsWith('http')) return url;
-
-    // Xử lý đường dẫn tương đối:
-    // Vì file index.php nằm trong admin_web/, còn ảnh nằm trong uploads/ (ngang hàng admin_web)
-    // Nên đường dẫn đúng phải là: ../uploads/ten_anh.jpg
-    
-    // Xóa dấu / hoặc ../ ở đầu nếu người dùng lỡ nhập dư
     let cleanUrl = url.replace(/^(\.\.\/|\/)+/, '');
-    
     return '../' + cleanUrl; 
 }
 
 function navigate(page) {
     document.querySelectorAll('.menu a').forEach(el => el.classList.remove('active'));
-    document.getElementById(`nav-${page}`).classList.add('active');
+    const navItem = document.getElementById(`nav-${page}`);
+    if(navItem) navItem.classList.add('active');
 
     switch(page) {
         case 'dashboard': renderDashboard(); break;
@@ -41,10 +32,10 @@ function navigate(page) {
         case 'customers': renderCustomers(); break;
         case 'users': renderUsers(); break;
         case 'settings': renderSettings(); break;
+        case 'inventory': renderInventory(); break;
     }
 }
 
-// --- DASHBOARD ---
 function renderDashboard() {
     pageTitle.textContent = "Tổng Quan";
     const orders = mockData.orders || [];
@@ -118,7 +109,6 @@ function renderDashboard() {
     `;
 }
 
-// --- QUẢN LÝ SẢN PHẨM ---
 function renderProducts() {
     pageTitle.textContent = "Quản Lý Sản Phẩm";
     
@@ -227,7 +217,7 @@ function openProductModal(product = null) {
 
         <div style="display: flex; gap: 15px;">
              <div class="form-group" style="flex: 1;">
-                <label>Tồn kho</label>
+                <label>Số lượng</label>
                 <input type="number" id="p-stock" class="form-control" value="${product ? product.stock : '0'}">
             </div>
              <div class="form-group" style="flex: 1;">
@@ -309,7 +299,7 @@ function saveProduct(id) {
 }
 
 function deleteProduct(id) {
-    if(confirm('Bạn có chắc muốn xóa? Nếu sản phẩm đã bán, bạn sẽ không thể xóa.')) {
+    if(confirm('Bạn có muốn xóa sản phẩm này? Nếu sản phẩm đã từng bán, hệ thống sẽ chỉ ẩn nó đi.')) {
         const formData = new FormData();
         formData.append('action', 'delete');
         formData.append('product_id', id);
@@ -321,14 +311,11 @@ function deleteProduct(id) {
                 alert(data.message);
                 renderProducts();
             } else {
-                // Hiển thị thông báo lỗi chi tiết (ví dụ: yêu cầu chuyển trạng thái)
                 alert("KHÔNG THỂ XÓA: " + data.message);
             }
         });
     }
 }
-
-// --- CÁC PHẦN KHÁC (ORDERS, CUSTOMERS...) ---
 
 function renderOrders() {
     pageTitle.textContent = "Quản Lý Đơn Hàng";
@@ -591,6 +578,116 @@ function fetchCategories() {
             }
         })
         .catch(err => console.error("Lỗi lấy danh mục:", err));
+}
+
+function renderInventory() {
+    pageTitle.textContent = "Quản Lý Kho Hàng";
+    
+    fetch('api/inventory.php')
+        .then(res => res.json())
+        .then(resData => {
+            if(resData.status === 'success') {
+                displayInventoryTable(resData.data);
+            } else {
+                alert('Lỗi tải kho: ' + resData.message);
+            }
+        })
+        .catch(err => console.error(err));
+}
+
+function displayInventoryTable(items) {
+    app.innerHTML = `
+        <div class="panel">
+            <div class="panel-header">
+                <h3>Tình trạng tồn kho</h3>
+                <button class="btn btn-secondary" onclick="renderInventory()"><i class="fas fa-sync"></i> Làm mới</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Hình ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Tồn kho hiện tại</th>
+                            <th>Cập nhật lần cuối</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${items.map(item => `
+                            <tr>
+                                <td>${item.product_id}</td>
+                                <td>
+                                    <img src="${getImageUrl(item.image_url)}" width="40" height="40" style="object-fit:cover; border-radius:4px;">
+                                </td>
+                                <td><strong>${item.name}</strong></td>
+                                <td>
+                                    <span class="status ${item.stock < 10 ? 'cancelled' : 'completed'}" style="font-size:14px;">
+                                        ${item.stock}
+                                    </span>
+                                </td>
+                                <td>${item.last_updated || 'Chưa cập nhật'}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="openImportModal(${item.product_id}, '${item.name}')">
+                                        <i class="fas fa-plus-circle"></i> Nhập hàng
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function openImportModal(id, name) {
+    modalTitle.textContent = "Nhập Kho: " + name;
+    modalActionBtn.style.display = 'inline-block';
+    
+    modalBody.innerHTML = `
+        <div class="form-group">
+            <label>Số lượng muốn nhập thêm (*)</label>
+            <input type="number" id="inv-qty" class="form-control" placeholder="Nhập số lượng..." min="1">
+            <small style="color: #666;">Số lượng này sẽ được cộng thêm vào kho hiện tại.</small>
+        </div>
+    `;
+
+    modalActionBtn.textContent = "Xác nhận nhập";
+    modalActionBtn.onclick = () => saveInventoryImport(id);
+    
+    modalOverlay.classList.add('active');
+}
+
+function saveInventoryImport(id) {
+    const qty = document.getElementById('inv-qty').value;
+    
+    if (!qty || qty <= 0) {
+        alert("Vui lòng nhập số lượng hợp lệ!");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'import');
+    formData.append('product_id', id);
+    formData.append('quantity', qty);
+
+    fetch('api/inventory.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            alert(data.message);
+            closeModal();
+            renderInventory(); 
+        } else {
+            alert("Lỗi: " + data.message);
+        }
+    })
+    .catch(err => console.error(err));
 }
 
 window.onload = () => {
