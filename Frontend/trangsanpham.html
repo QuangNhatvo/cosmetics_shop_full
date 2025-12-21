@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chăm sóc da mặt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Anton&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Header Styles */
+        :root {
+            --stripe-color-1: #dcdfe2;
+            --stripe-color-2: #e8eaec;
+            --header-bg: #c7e6c8;
+            --text-dark: #1a1a1a;
+            --text-black: #000;
+            --text-gray: #333;
+            --text-light-gray: #a0a0a0;
+            --text-green-dark: #1f2923;
+            --border-green: #aed9af;
+            --bg-white: #fff;
+            --primary-red: #e60000;
+            --primary-red-hover: #c40000;
+            --text-light: #666666;
+            --border-color: #e5e5e5;
+            --background-light: #f9f9f9;
+            --white: #ffffff;
+            --placeholder-bg: #e0e0e0;
+            --footer-bg-color: #000000;
+            --footer-text-color: #FFFFFF;
+            --footer-light-gray: #D9D9D9;
+            --footer-accent-color: #C8C96C;
+            --footer-accent-hover: #b8b95c;
+            --footer-placeholder-color: #6c757d;
+            --footer-copyright-color: #a0a0a0;
+            --footer-divider-color: rgba(255, 255, 255, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            color: var(--text-dark);
+            background-color: var(--white);
+            margin: 0;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Header Styles */
+        .top-stripe-bar {
+            height: 6px;
+            background-color: #d1d9e0;
+            background-image: repeating-linear-gradient(45deg, var(--stripe-color-1), var(--stripe-color-1) 5px, var(--stripe-color-2) 5px, var(--stripe-color-2) 10px);
+        }
+
+        .header-nav {
+            background-color: var(--header-bg);
+            padding: 0.75rem 0;
+        }
+
+        .navbar-brand .fa-gem {
+            font-size: 2.2rem;
+            color: var(--text-dark);
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .navbar-brand:hover .fa-gem {
+            transform: scale(1.1) rotate(10deg);
+            color: var(--text-black);
+        }
+
+        .search-form-container {
+            flex-grow: 1;
+            margin: 0 2.5rem;
+            max-width: 650px;
+        }
+
+        .search-form {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            border-radius: 50px;
+            border: 1px solid transparent;
+            padding: 0.8rem 3.5rem 0.8rem 1.7rem;
+            font-size: 0.95rem;
+            color: var(--text-gray);
+            background-color: var(--bg-white);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: var(--border-green);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-light-gray);
+        }
+
+        .search-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-gray);
+            padding: 0 0.75rem;
+            transition: color 0.3s ease;
+        }
+
+        .search-button:hover {
+            color: var(--text-black);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 2.2rem;
+        }
+
+        .nav-actions a {
+            color: var(--text-green-dark);
+            text-decoration: none;
+            transition: color 0.3s ease, transform 0.3s ease;
+            position: relative;
+        }
+
+        .nav-actions .icon-link {
+            font-size: 1.7rem;
+        }
+
+        .nav-actions a:hover {
+            color: var(--text-black);
+            transform: scale(1.15);
+        }
+
+        .auth-link {
+            font-size: 1rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .auth-link .fa-user-circle {
+            font-size: 1.9rem;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .auth-link:hover {
+            transform: scale(1.05);
+        }
+
+        /* Main Navigation Bar */
+        .main-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 0;
+        }
+
+        .main-header .container {
+            display: flex;
+            align-items: center;
+        }
+
+        .main-nav {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-red);
+        }
+
+        .nav-link i {
+            font-size: 18px;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 20px;
+        }
+
+        /* Category Dropdown Styles */
+        .category-dropdown {
+            position: relative;
+        }
+
+        .category-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-width: 280px;
+            padding: 0;
+            margin-top: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .category-dropdown:hover .category-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .category-dropdown-heading {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .category-dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid transparent;
+        }
+
+        .category-dropdown-item:hover {
+            background-color: var(--background-light);
+            color: var(--primary-red);
+        }
+
+        .category-dropdown-item.active {
+            border: 2px dotted #0066cc;
+            margin: 0 2px;
+        }
+
+        .category-dropdown-item i {
+            font-size: 12px;
+            color: var(--text-light);
+            transition: color 0.3s ease;
+        }
+
+        .category-dropdown-item:hover i,
+        .category-dropdown-item.active i {
+            color: var(--primary-red);
+        }
+
+        /* Content Styles */
+        .banner-placeholder {
+            height: 150px;
+            background-color: var(--placeholder-bg);
+            margin: 0 auto 30px;
+            max-width: 1200px;
+        }
+
+        .page-content {
+            display: flex;
+            gap: 30px;
+        }
+
+        .filters-sidebar {
+            width: 240px;
+            flex-shrink: 0;
+        }
+
+        .breadcrumbs {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        .filter-group {
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 0;
+        }
+
+        .filter-group:first-child {
+            padding-top: 0;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .filter-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .filter-header i {
+            font-size: 12px;
+            color: var(--text-light);
+            transition: transform 0.3s;
+        }
+
+        .filter-body ul {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-body label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .filter-body input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--text-dark);
+        }
+
+        .price-range {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .price-range input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .price-range span {
+            color: var(--text-light);
+        }
+
+        .apply-price-btn {
+            width: 100%;
+            background-color: var(--primary-red);
+            color: var(--white);
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .apply-price-btn:hover {
+            background-color: var(--primary-red-hover);
+        }
+
+        .product-listing {
+            flex-grow: 1;
+            border-left: 1px solid var(--border-color);
+            padding-left: 30px;
+        }
+
+        .sort-bar {
+            display: flex;
+            gap: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .sort-option {
+            font-size: 14px;
+            color: var(--text-light);
+            padding-bottom: 15px;
+            margin-bottom: -16px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        .sort-option.active,
+        .sort-option:hover {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .sort-option.active {
+            border-bottom-color: var(--text-dark);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .product-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.3s;
+            background-color: var(--white);
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .product-card a {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .product-image {
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1;
+        }
+
+        .product-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .product-info {
+            padding: 0 15px 15px;
+            text-align: left;
+            flex-grow: 1;
+        }
+
+        .product-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-red);
+            margin-bottom: 8px;
+        }
+
+        .product-name {
+            font-size: 14px;
+            color: var(--text-dark);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 39px;
+        }
+
+        /* Floating Socials */
+        .floating-socials {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .floating-social-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .floating-social-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .floating-social-icon.messenger {
+            background: linear-gradient(45deg, #0062E0, #8A2BE2);
+        }
+
+        .floating-social-icon.whatsapp {
+            background-color: #25D366;
+        }
+
+        .floating-social-icon.instagram {
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+        }
+
+        /* Footer Styles */
+        .custom-footer {
+            background-color: var(--footer-bg-color);
+            color: var(--footer-text-color);
+            padding: 50px 0;
+            font-size: 14px;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .footer-logo-placeholder {
+            background-color: var(--footer-light-gray);
+            height: 80px;
+            width: 100%;
+            max-width: 200px;
+            margin-bottom: 25px;
+        }
+
+        .footer-contact-info p {
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .social-icons-container {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .footer-social-icon {
+            width: 30px;
+            height: 30px;
+            background-color: var(--footer-light-gray);
+            border-radius: 50%;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .footer-social-icon:hover {
+            transform: scale(1.1);
+            background-color: var(--footer-accent-color);
+        }
+
+        .footer-heading {
+            font-family: 'Anton', sans-serif;
+            font-style: italic;
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: var(--footer-text-color);
+            letter-spacing: 1px;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: var(--footer-text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            color: var(--footer-accent-color);
+        }
+
+        .footer-col {
+            padding: 0 30px;
+        }
+
+        .vertical-divider {
+            border-left: 1px solid var(--footer-divider-color);
+        }
+
+        .newsletter-form p {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .newsletter-form .form-control {
+            background-color: var(--footer-light-gray);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            height: 48px;
+            color: #000;
+        }
+
+        .newsletter-form .form-control::placeholder {
+            color: var(--footer-placeholder-color);
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .newsletter-form .btn-submit {
+            background-color: var(--footer-accent-color);
+            color: var(--footer-text-color);
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            width: 100%;
+            max-width: 120px;
+            height: 48px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .newsletter-form .btn-submit:hover {
+            background-color: var(--footer-accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .copyright {
+            color: var(--footer-copyright-color);
+            font-size: 12px;
+            margin-top: 15px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .page-content {
+                gap: 20px;
+            }
+            .product-listing {
+                padding-left: 20px;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .footer-col {
+                margin-bottom: 40px;
+                padding: 0 15px;
+            }
+
+            .vertical-divider {
+                border-left: none;
+            }
+
+            .col-company, .col-newsletter {
+                border-top: 1px solid var(--footer-divider-color);
+                padding-top: 40px;
+            }
+
+            .custom-footer .row > .col-md-6:nth-child(2) .vertical-divider {
+                border-left: 1px solid var(--footer-divider-color);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-header .container {
+                justify-content: space-between;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .main-nav {
+                display: none;
+            }
+
+            .category-dropdown {
+                display: none;
+            }
+
+            .page-content {
+                flex-direction: column;
+            }
+
+            .filters-sidebar {
+                width: 100%;
+            }
+
+            .product-listing {
+                border-left: none;
+                padding-left: 0;
+            }
+
+            .sort-bar {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .sort-option {
+                padding-bottom: 10px;
+                margin-bottom: -11px;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .product-name {
+                font-size: 13px;
+                min-height: 36px;
+            }
+
+            .product-price {
+                font-size: 16px;
+            }
+
+            .floating-socials {
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .floating-social-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 24px;
+            }
+
+            .custom-footer {
+                text-align: center;
+            }
+
+            .footer-logo-placeholder {
+                margin: 0 auto 25px;
+            }
+
+            .social-icons-container {
+                justify-content: center;
+            }
+
+            .footer-col {
+                padding-top: 30px;
+                margin-bottom: 0;
+            }
+
+            .footer-col:not(:first-child) {
+                border-top: 1px solid var(--footer-divider-color);
+            }
+
+            .col-company, .col-newsletter {
+                border-top: none;
+                padding-top: 30px;
+            }
+
+            .brand-columns {
+                text-align: center;
+            }
+
+            .brand-columns .col-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .newsletter-form .btn-submit {
+                margin: 15px auto 0;
+            }
+
+            .newsletter-form .d-flex {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="top-stripe-bar"></div>
+        <nav class="header-nav">
+            <div class="container-fluid px-4 d-flex align-items-center justify-content-between">
+                <a class="navbar-brand" href="#" aria-label="Homepage">
+                    <i class="fas fa-gem"></i>
+                </a>
+
+                <div class="search-form-container">
+                    <form class="search-form" action="#" method="get" role="search">
+                        <input class="search-input" type="search" placeholder="Tìm sản phẩm, thương hiệu bạn mong muốn..">
+                        <button class="search-button" type="submit" aria-label="Search">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="nav-actions">
+                    <a href="#" class="icon-link" aria-label="Shopping Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <a href="#" class="icon-link" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                    </a>
+                    <a href="#" class="auth-link d-flex align-items-center">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Log in / Sign up</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Navigation -->
+    <header class="main-header">
+        <div class="container">
+            <button class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav class="main-nav">
+                <div class="category-dropdown">
+                    <a href="#" class="nav-link category-link">
+                        <i class="fas fa-bars"></i>
+                        <span>Danh Mục</span>
+                    </a>
+                    <div class="category-dropdown-menu">
+                        <div class="category-dropdown-heading">Sức khỏe và làm đẹp</div>
+                        <a href="#" class="category-dropdown-item">
+                            <span>Chăm sóc da mặt</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="#" class="category-dropdown-item">
+                            <span>Trang điểm</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="#" class="category-dropdown-item active">
+                            <span>Chăm sóc tóc và da đầu</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="#" class="category-dropdown-item">
+                            <span>Chăm sóc cơ thể</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="#" class="category-dropdown-item">
+                            <span>Chăm sóc cá nhân</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="#" class="category-dropdown-item">
+                            <span>Nước hoa</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <a href="#" class="nav-link">Special Deals</a>
+                <a href="#" class="nav-link">Hot Deals</a>
+                <a href="#" class="nav-link">Thương Hiệu</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Banner -->
+    <div class="banner-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="page-content">
+            <aside class="filters-sidebar">
+                <div class="breadcrumbs">Danh mục</div>
+                <h1 class="page-title">Chăm sóc da mặt</h1>
+
+                <div class="filter-group">
+                    <div class="filter-header">
+                        <h3>Danh mục sản phẩm</h3>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="filter-body">
+                        <ul>
+                            <li><label><input type="checkbox"> Quy trình dưỡng da</label></li>
+                            <li><label><input type="checkbox"> Chăm sóc cơ thể</label></li>
+                            <li><label><input type="checkbox"> Thực phẩm chức năng</label></li>
+                            <li><label><input type="checkbox"> Thiết bị làm đẹp</label></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-header">
+                        <h3>Từ khóa</h3>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="filter-body">
+                        <ul>
+                            <li><label><input type="checkbox"> Dưỡng ẩm</label></li>
+                            <li><label><input type="checkbox"> Giảm mụn</label></li>
+                            <li><label><input type="checkbox"> Dưỡng trắng</label></li>
+                            <li><label><input type="checkbox"> Chống lão hóa</label></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-header">
+                        <h3>Giá</h3>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="filter-body">
+                        <div class="price-range">
+                            <input type="text" value="0">
+                            <span>-</span>
+                            <input type="text" value="100.000.000">
+                        </div>
+                        <button class="apply-price-btn">Áp dụng</button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-header">
+                        <h3>Thương hiệu</h3>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="filter-body">
+                        <ul>
+                            <li><label><input type="checkbox"> Some By Mi</label></li>
+                            <li><label><input type="checkbox"> Black Rouge</label></li>
+                            <li><label><input type="checkbox"> BENTON</label></li>
+                            <li><label><input type="checkbox"> Tisha</label></li>
+                            <li><label><input type="checkbox"> Mediheal</label></li>
+                            <li><label><input type="checkbox"> DHC</label></li>
+                            <li><label><input type="checkbox"> Derladie</label></li>
+                            <li><label><input type="checkbox"> Holikey</label></li>
+                            <li><label><input type="checkbox"> Eldas</label></li>
+                            <li><label><input type="checkbox"> Etude House</label></li>
+                            <li><label><input type="checkbox"> Cosrx</label></li>
+                            <li><label><input type="checkbox"> MISEEN</label></li>
+                            <li><label><input type="checkbox"> Huxley</label></li>
+                            <li><label><input type="checkbox"> AHC</label></li>
+                            <li><label><input type="checkbox"> Useemi</label></li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="product-listing">
+                <div class="sort-bar">
+                    <a href="#" class="sort-option active">Mới nhất</a>
+                    <a href="#" class="sort-option">Bán chạy</a>
+                    <a href="#" class="sort-option">Giá thấp đến cao</a>
+                    <a href="#" class="sort-option">Giá cao đến thấp</a>
+                </div>
+
+                <div class="product-grid">
+                    <div class="product-card">
+                        <a href="#">
+                            <div class="product-image">
+                                <img src="image/Kem duong mat some by mi.jpg" alt="Kem Dưỡng Mắt Some By Mi Retinol Intense">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-price">347.000₫</p>
+                                <p class="product-name">Kem Dưỡng Mắt Some By Mi Retinol Intense Advanced Triple Action Eye Cream 30ml</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="#">
+                            <div class="product-image">
+                                <img src="image/son-kem-ly-black-rouge-a45.jpg" alt="Son Black Rouge Airfit Velvet">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-price">298.000₫</p>
+                                <p class="product-name">A45 - Son Black Rouge Airfit Velvet Chính Hãng</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="#">
+                            <div class="product-image">
+                                <img src="image/Nuoc hoa hong Benton snail bee.jpeg" alt="Nước Hoa Hồng Benton Snail Bee">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-price">99.000₫</p>
+                                <p class="product-name">Nước Hoa Hồng Hỗ Trợ Phục Hồi, Làm Dịu Da Benton Snail Bee High Content Skin 150ml</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="#">
+                            <div class="product-image">
+                                <img src="image/Chogongjin-Face-and-Eye-Cream-jpg.jpg" alt="MISA Cho Gong Jin Face and Eye Cream">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-price">450.000₫</p>
+                                <p class="product-name">MISA Cho Gong Jin Face and Eye Cream</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="#">
+                            <div class="product-image">
+                                <img src="image/Serum duong da Cosrx.jpg" alt="Serum Dưỡng Da Cosrx Advanced Snail 96 Mucin Power Essence">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-price">380.000₫</p>
+                                <p class="product-name">Serum Dưỡng Da Cosrx Advanced Snail 96 Mucin Power Essence 100ml</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="#">
+                            <div class="product-image">
+                                <img src="image/Kem chong nang AHC.png" alt="Kem Chống Nắng AHC Natural Perfection Fresh Sun Stick">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-price">220.000₫</p>
+                                <p class="product-name">Kem Chống Nắng AHC Natural Perfection Fresh Sun Stick SPF50+ PA++++ 22g</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="#">
+                            <div class="product-image">
+                                <img src="image/Mat na mediheal.jpg" alt="Mặt Nạ Mediheal N.M.F Aquaring Ampoule Mask">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-price">25.000₫</p>
+                                <p class="product-name">Mặt Nạ Mediheal N.M.F Aquaring Ampoule Mask 25ml</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="#">
+                            <div class="product-image">
+                                <img src="image/Tone duong am Etude house.webp" alt="Toner Dưỡng Ẩm Etude House SoonJung pH 5.5 Relief Toner">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-price">180.000₫</p>
+                                <p class="product-name">Toner Dưỡng Ẩm Etude House SoonJung pH 5.5 Relief Toner 200ml</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="#">
+                            <div class="product-image">
+                                <img src="image/Kem duong da green tea.png" alt="Kem Dưỡng Da Innisfree Green Tea Seed Cream">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-price">320.000₫</p>
+                                <p class="product-name">Kem Dưỡng Da Innisfree Green Tea Seed Cream 50ml</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="custom-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 footer-col">
+                    <div class="footer-logo-placeholder"></div>
+                    <div class="footer-contact-info">
+                        <p>Call us: 077xxxxxxxx</p>
+                        <p>"your slogan"</p>
+                        <p>Example@abc.com</p>
+                    </div>
+                    <div class="social-icons-container">
+                        <a href="#" aria-label="Social Media 1"><div class="footer-social-icon"></div></a>
+                        <a href="#" aria-label="Social Media 2"><div class="footer-social-icon"></div></a>
+                        <a href="#" aria-label="Social Media 3"><div class="footer-social-icon"></div></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6 footer-col vertical-divider col-company">
+                    <h3 class="footer-heading">COMPANY</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">ABOUT US</a></li>
+                        <li><a href="#">CONTACT US</a></li>
+                        <li><a href="#">DATA POLICY</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-6 footer-col vertical-divider">
+                    <h3 class="footer-heading">TOP BRAND</h3>
+                    <div class="row brand-columns">
+                        <div class="col-6">
+                            <ul class="footer-links">
+                                <li><a href="#">La Roche-Posay</a></li>
+                                <li><a href="#">L'Oréal</a></li>
+                                <li><a href="#">Thorakao</a></li>
+                                <li><a href="#">Cocoon</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <ul class="footer-links">
+                                <li><a href="#">Estée Lauder</a></li>
+                                <li><a href="#">Decumar</a></li>
+                                <li><a href="#">Shiseido</a></li>
+                                <li><a href="#">Innisfree</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 footer-col vertical-divider col-newsletter">
+                    <form class="newsletter-form" id="newsletterForm">
+                        <p>Sign up Newletter</p>
+                        <div class="d-flex gap-2">
+                            <input type="email" class="form-control" placeholder="YOUR EMAIL" required>
+                            <button type="submit" class="btn btn-submit">Submit</button>
+                        </div>
+                        <div class="copyright">@ 2025 all right reserved</div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Social Icons -->
+    <aside class="floating-socials">
+        <a href="#" class="floating-social-icon messenger" aria-label="Facebook Messenger">
+            <i class="fab fa-facebook-messenger"></i>
+        </a>
+        <a href="#" class="floating-social-icon whatsapp" aria-label="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+        <a href="#" class="floating-social-icon instagram" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+        </a>
+    </aside>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        document.getElementById('newsletterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for subscribing!');
+            this.reset();
+        });
+    </script>
+</body>
+</html>
