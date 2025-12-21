@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $servername = "127.0.0.1";
 $username = "root";
-$password = "";
+$password = "@123";
 $dbname = "QLBH";
 
 $conn = mysqli_connect($servername, $username, $password, $dbname);

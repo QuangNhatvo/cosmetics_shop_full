@@ -54,7 +54,7 @@ $userName = isset($_SESSION['name']) ? $_SESSION['name'] : 'Khách';
                 <a href="logout.php" class="btn-logout">Đăng xuất</a>
             <?php else: ?>
                 <a href="login.php">Đăng nhập</a>
-                <a href="#">Đăng ký</a>
+                <a href="register.php">Đăng ký</a>
             <?php endif; ?>
         </div>
     </nav>

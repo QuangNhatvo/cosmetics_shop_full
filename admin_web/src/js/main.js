@@ -333,8 +333,7 @@ function renderOrders() {
                             <th>Khách Hàng</th>
                             <th>Ngày Đặt</th>
                             <th>Tổng Tiền</th>
-                            <th>Trạng Thái</th>
-                            <th>Hành Động</th>
+                            <th>Trạng Thái</th> <th>Hành Động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -344,7 +343,33 @@ function renderOrders() {
                                 <td>${o.customer}</td>
                                 <td>${o.date}</td>
                                 <td>${formatCurrency(o.total)}</td>
-                                <td><span class="status ${o.status}">${getStatusText(o.status)}</span></td>
+                                
+                                <td>
+                                    <select onchange="updateOrderStatus(${o.id}, this.value)" 
+                                            class="status-select status-${o.status}"
+                                            style="padding: 5px; border-radius: 4px; border: 1px solid #ddd;">
+                                        
+                                        <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>
+                                            Chờ xử lý (Pending)
+                                        </option>
+                                        
+                                        <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>
+                                            Đã xác nhận (Confirmed)
+                                        </option>
+                                        
+                                        <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>
+                                            Đang giao (Shipped)
+                                        </option>
+                                        
+                                        <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>
+                                            Đã giao (Delivered)
+                                        </option>
+                                        
+                                        <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>
+                                            Đã hủy (Cancelled)
+                                        </option>
+                                    </select>
+                                </td>
                                 <td>
                                     <button class="btn btn-primary btn-sm" onclick="viewOrder('${o.id}')"><i class="fas fa-eye"></i></button>
                                 </td>
@@ -694,3 +719,37 @@ window.onload = () => {
     fetchCategories(); 
     renderDashboard();
 };
+
+function updateOrderStatus(orderId, newStatus) {
+    if(!confirm(`Bạn muốn đổi trạng thái đơn hàng #${orderId} sang "${newStatus}"?`)) {
+        renderOrders();
+        return;
+    }
+
+    fetch('./api/order.php', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            order_id: orderId,
+            status: newStatus
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('Cập nhật thành công!');
+            const orderIndex = mockData.orders.findIndex(o => o.id == orderId);
+            if (orderIndex !== -1) {
+                mockData.orders[orderIndex].status = newStatus;
+                renderOrders(); 
+            }
+        } else {
+            alert('Lỗi: ' + data.message);
+            renderOrders();
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Lỗi kết nối server!');
+    });
+}
